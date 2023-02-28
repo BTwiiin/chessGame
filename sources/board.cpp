@@ -64,6 +64,19 @@ Board::~Board() {
     }
 }
 
+// SETTERS
+void Board::setKingPos(int x, int y, bool isWhite) {
+    if (isWhite) {
+        kingPos[0]->first = x;
+        kingPos[0]->second = y;
+    }
+    else {
+        kingPos[1]->first = x;
+        kingPos[1]->second = y;
+    }
+}
+
+
 //draws the board
 void Board::drawBoard(const bool whoseMove) {
     if(whoseMove)
@@ -195,9 +208,14 @@ bool Board::isMoveValidBishop(int x1, int y1, int x2, int y2) const {
 }
 
 bool Board::isMoveValidKing(int x1, int y1, int x2, int y2) const {
-    if (std::abs(x2 - x1) <= 1 && std::abs(y2 - y1)){
-        Board checkBoard(*this);
-        checkBoard.getPiece(x2, y2) = checkBoard.getPiece(x1, y1);
+    if (std::abs(x2 - x1) <= 1 && std::abs(y2 - y1)) {
+        Board checkBoard(*this); // Create a copy of the board
+        checkBoard.moveKingForCheck(x1, y1, x2, y2); // Move the king to the new position
+        checkBoard.setKingPos(x2, y2, this->board[x1][y1]->isWhite_()); // Update the king's position
+        if(checkBoard.isCheck(board[x1][y1]->isWhite_()))
+            std::cout << "King is in check!" << std::endl;
+
+
         return !checkBoard.isCheck(board[x1][y1]->isWhite_());
 
     }
@@ -253,7 +271,25 @@ bool Board::isCheck(const bool whoseMove) const {
     return false;
 }
 
-
+//bool Board::isCheckForKing(const bool whoseMove) const {
+//    // Determine the position of the current player's king
+//    std::pair<int, int>* kingPosPtr = kingPos[whoseMove ? 0 : 1];
+//    int kingX = kingPosPtr->first;
+//    int kingY = kingPosPtr->second;
+//
+//    // Iterate over all the opponent's pieces
+//    for (int x = 0; x < 8; x++) {
+//        for (int y = 0; y < 8; y++) {
+//            Piece* piece = board[x][y];
+//            if (piece->isWhite_() != whoseMove) {  // if the piece belongs to the opponent
+//                if (isMoveValid(x, y, kingX, kingY)) {  // if the piece can attack the king
+//                    return true;
+//                }
+//            }
+//        }
+//    }
+//    return false;
+//}
 
 bool Board::movePiece(int x1, int y1, int x2, int y2) {
     if (isMoveValid(x1, y1, x2, y2)){
@@ -264,6 +300,11 @@ bool Board::movePiece(int x1, int y1, int x2, int y2) {
     return false;
 }
 
+void Board::moveKingForCheck(int x1, int y1, int x2, int y2) {
+    board[x2][y2] = board[x1][y1];
+    board[x1][y1] = new Piece(PieceType::EMPTY, false);
+}
+
 bool Board::isEmpty(int x, int y) const {
     return board[x][y]->getType() == PieceType::EMPTY;
 }
@@ -272,7 +313,7 @@ bool Board::isOccupiedByColor(int x, int y, bool isWhite) const{
     return board[x][y]->isWhite_() == isWhite;
 }
 
-Piece& Board::getPiece(int x, int y) const {
+Piece& Board::getPiece(int x, int y) {
     // Check that the given coordinates are within the board
     if (x < 0 || x > 7 || y < 0 || y > 7) {
         throw std::out_of_range("Coordinates out of range");
