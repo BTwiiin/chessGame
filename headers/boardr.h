@@ -16,6 +16,10 @@ public:
     // Returns the piece at the given position
     //Piece* getPiece(int x, int y);
 
+    // SETTERS
+    void setKingPos(int x, int y, bool isWhite); // Sets the position of the king of the given color
+    void setPiece(int x, int y, Piece& piece); // Sets the piece at the given position
+
     // Set of functions to check if a move is valid
     bool isMoveValid(int x1, int y1, int x2, int y2) const ;
     bool isMoveValidPawn(int x1, int y1, int x2, int y2) const ;
@@ -26,8 +30,13 @@ public:
 
     bool isCheck(const bool whoseMove) const;
 
+    bool isCheckForKing(const bool whoseMove) const;
+
     // Moves the piece at the given position to the given position
     bool movePiece(int x1, int y1, int x2, int y2);
+
+    // Moves the king at the given position to the given position
+    void moveKingForCheck(int x1, int y1, int x2, int y2);
 
     // Returns true if the given position is empty
     bool isEmpty(int x, int y) const;
@@ -42,7 +51,7 @@ public:
     bool isOccupiedByType(int x, int y, PieceType type);
 
     //
-    Piece& getPiece(int x, int y) const;
+    Piece& getPiece(int x, int y);
 
     // Operators
     Board& operator=(const Board& other);
